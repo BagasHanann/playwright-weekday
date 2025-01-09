@@ -1,4 +1,7 @@
 const { test, expect } = require('@playwright/test');
+const { default: loginActions } = require('./spec/actions/loginActions');
+const { default: cartActions } = require('./spec/actions/cartActions');
+const { default: checkoutActions } = require('./spec/actions/checkoutActions');
 
 test('assertion and locators', async ({ page }) => {
 	await page.goto('https://saucedemo.com/');
@@ -54,4 +57,41 @@ test('assertion and locators', async ({ page }) => {
 
 	const buttonBackHome = page.locator('#back-to-products');
 	await buttonBackHome.click();
+});
+
+test('fitur login pakai page object models', async ({ page }) => {
+	const loginObj = new loginActions(page);
+	await loginObj.goTo();
+	await loginObj.inputLogin();
+});
+
+test('fitur cart menggunakan page object models', async ({ page }) => {
+	const login = new loginActions(page);
+	const cart = new cartActions(page);
+
+	// Aksi login
+	await login.goTo();
+	await login.inputLogin();
+
+	// Aksi keranjang belanja
+	await cart.addItemToCart();
+	await cart.removeItemFromCart();
+	await cart.openCart();
+});
+
+test('fitur checkout menggunakan page object models', async ({ page }) => {
+	const login = new loginActions(page);
+	const cart = new cartActions(page);
+	const checkout = new checkoutActions(page);
+
+	await login.goTo();
+	await login.inputLogin();
+
+	await cart.addItemToCart();
+	await cart.removeItemFromCart();
+	await cart.openCart();
+
+	await checkout.inputCheckout('Bagas', 'Hananto', '12345');
+	await checkout.finishCheckout();
+	await checkout.goBackHome();
 });
